@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ieee-blue:       #00629B;
+  --color-ieee-blue-dark:  #004f7c;
+  --color-ieee-blue-light: #e6f0f7;
+  --color-uga-red:         #BA0C2F;
+  --color-uga-azure:       #00629b;
+  --color-uga-dark:        #0a0a0a;
+  --font-sans: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+}
+
+@layer components {
+  .input {
+    @apply w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ieee-blue focus:border-transparent transition;
+  }
+}
+
+/* Mediagen slide base — plain CSS, not Tailwind (uses per-slide CSS vars set by Canvas.jsx) */
+.slide-root {
+  width: var(--slide-w, 540px);
+  height: var(--slide-h, 675px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  overflow: hidden;
+}
+
+.slide-counter {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.slide-brand {
+  position: absolute;
+  bottom: 22px;
+  right: 24px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
