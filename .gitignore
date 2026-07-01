@@ -9,6 +9,10 @@ dist/
 .env.local
 .env.*.local
 
+# Signature images — real PNGs live in a private Supabase Storage bucket
+# instead (see supabase/migration_add_signatures_bucket.sql), never in git.
+public/signatures/*.png
+
 # Editor
 .vscode/
 .idea/

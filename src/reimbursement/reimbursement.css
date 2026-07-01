@@ -1,0 +1,199 @@
+/* Scoped under .reimb so it doesn't leak into the rest of the platform (which uses Tailwind). */
+.reimb, .reimb *, .reimb *::before, .reimb *::after { box-sizing: border-box; }
+
+.reimb {
+  --blue:       #00629B;
+  --blue-dark:  #003087;
+  --blue-light: #e8f4fb;
+  --text:       #1a1a2e;
+  --muted:      #5a6475;
+  --border:     #d0dce8;
+  --bg:         #f4f7fa;
+  --white:      #ffffff;
+  --radius:     8px;
+
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.reimb p, .reimb h1, .reimb h2 { margin: 0; }
+
+/* HOME */
+.reimb .home { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+
+.reimb .home-header { text-align: center; margin-bottom: 40px; }
+.reimb .home-logo {
+  display: inline-block; background: var(--blue-dark); color: #fff;
+  font-weight: 800; font-size: 20px; letter-spacing: 2px;
+  padding: 6px 14px; border-radius: 4px; margin-bottom: 16px;
+}
+.reimb .home-header h1 { font-size: 28px; color: var(--blue-dark); margin-bottom: 6px; }
+.reimb .home-header p  { color: var(--muted); }
+
+.reimb .card-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;
+}
+
+.reimb .form-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 24px 20px; text-align: left; cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.reimb .form-card:hover { box-shadow: 0 4px 16px rgba(0,98,155,0.15); border-color: var(--blue); }
+
+.reimb .card-icon  { font-size: 28px; }
+.reimb .card-title { font-size: 15px; font-weight: 700; color: var(--blue-dark); }
+.reimb .card-desc  { font-size: 13px; color: var(--muted); line-height: 1.5; flex: 1; }
+.reimb .card-cta   { font-size: 13px; font-weight: 600; color: var(--blue); margin-top: 4px; }
+
+/* FORM PAGES */
+.reimb .form-page { max-width: 720px; margin: 0 auto; padding: 32px 24px 64px; }
+
+.reimb .form-page-header {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 28px;
+  padding-bottom: 16px; border-bottom: 2px solid var(--blue-light);
+}
+.reimb .form-page-header h1 { font-size: 20px; color: var(--blue-dark); }
+
+.reimb .back-btn {
+  background: none; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 6px 12px; cursor: pointer; color: var(--blue); font-size: 13px; white-space: nowrap;
+}
+.reimb .back-btn:hover { background: var(--blue-light); }
+
+.reimb .form-body { display: flex; flex-direction: column; gap: 24px; }
+
+.reimb .form-section {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 24px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.reimb .form-section h2 {
+  font-size: 13px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--blue); margin-bottom: 4px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--blue-light);
+}
+
+.reimb .prefilled-banner {
+  background: var(--blue-light); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 16px; font-size: 13px; color: var(--blue-dark);
+}
+
+/* FIELDS */
+.reimb .field-group { display: flex; flex-direction: column; gap: 4px; }
+.reimb .field-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+
+.reimb .field-input {
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 7px 10px; font-size: 14px; color: var(--text);
+  background: var(--white); width: 100%;
+  transition: border-color 0.15s;
+}
+.reimb .field-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,98,155,0.1); }
+
+.reimb .field-textarea { resize: vertical; min-height: 72px; font-family: inherit; }
+
+.reimb .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+
+/* RADIO / CHECKBOX */
+.reimb .radio-group { display: flex; flex-wrap: wrap; gap: 16px; }
+.reimb .radio-label {
+  display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px;
+}
+.reimb .radio-label input { accent-color: var(--blue); width: 15px; height: 15px; }
+
+.reimb .checkbox-label {
+  display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 13px; line-height: 1.4;
+}
+.reimb .checkbox-label input { accent-color: var(--blue); margin-top: 2px; flex-shrink: 0; }
+
+/* SPEEDTYPE INFO */
+.reimb .speedtype-info {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  background: var(--blue-light); border-radius: 6px; padding: 10px 14px; font-size: 12px;
+  color: var(--blue-dark);
+}
+.reimb .speedtype-info strong { font-weight: 700; }
+
+/* SIGNATURE PREVIEW */
+.reimb .sig-preview {
+  margin-top: 6px; max-height: 50px; max-width: 180px;
+  border: 1px solid var(--border); border-radius: 4px; background: #fff; padding: 2px;
+}
+
+/* INDIVIDUALS TABLE */
+.reimb .section-hint { font-size: 12px; color: var(--muted); }
+.reimb .individuals-header {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted);
+  padding: 0 2px;
+}
+.reimb .individual-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.reimb .btn-add {
+  align-self: flex-start; background: none; border: 1px dashed var(--blue);
+  color: var(--blue); border-radius: 6px; padding: 5px 12px; cursor: pointer; font-size: 12px;
+}
+.reimb .btn-add:hover { background: var(--blue-light); }
+
+/* ACTIONS */
+.reimb .form-actions {
+  display: flex; justify-content: flex-end; gap: 12px; padding-top: 8px;
+}
+
+.reimb .btn-primary {
+  background: var(--blue); color: #fff; border: none; border-radius: var(--radius);
+  padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s;
+}
+.reimb .btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+.reimb .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.reimb .btn-secondary {
+  background: var(--white); color: var(--muted); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 20px; font-size: 14px; cursor: pointer;
+}
+.reimb .btn-secondary:hover { background: var(--bg); }
+
+/* PREVIEW MODAL */
+.reimb .modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 24px;
+}
+
+.reimb .modal {
+  background: var(--white); border-radius: var(--radius);
+  display: flex; flex-direction: column;
+  width: 100%; max-width: 860px; height: 90vh;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+  overflow: hidden;
+}
+
+.reimb .modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  gap: 12px; flex-shrink: 0;
+}
+
+.reimb .modal-title {
+  font-size: 13px; font-weight: 600; color: var(--blue-dark);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.reimb .modal-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.reimb .modal-close {
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  width: 32px; height: 32px; cursor: pointer; font-size: 14px;
+  color: var(--muted); display: flex; align-items: center; justify-content: center;
+}
+.reimb .modal-close:hover { background: var(--bg); color: var(--text); }
+
+.reimb .modal-iframe {
+  flex: 1; width: 100%; border: none;
+}

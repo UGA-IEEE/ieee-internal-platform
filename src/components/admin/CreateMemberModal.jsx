@@ -134,7 +134,7 @@ export function CreateMemberModal({ onClose, onCreated }) {
                   disabled={form.role === 'admin'}
                   className="w-4 h-4 rounded border-gray-300 text-ieee-blue focus:ring-ieee-blue"
                 />
-                <span className="text-sm text-gray-700">FYC Intern Tracker</span>
+                <span className="text-sm text-gray-700">FYC Internship App Tracker</span>
               </label>
             </div>
             {form.role === 'admin' && (

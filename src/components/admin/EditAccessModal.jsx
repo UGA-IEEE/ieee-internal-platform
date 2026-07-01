@@ -48,7 +48,7 @@ export function EditAccessModal({ member, onClose, onSaved }) {
           <label className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors">
             <div className="flex items-center gap-3">
               <FileText size={16} className="text-ieee-blue" />
-              <span className="text-sm font-medium text-gray-700">FYC Intern Tracker</span>
+              <span className="text-sm font-medium text-gray-700">FYC Internship App Tracker</span>
             </div>
             <input
               type="checkbox"

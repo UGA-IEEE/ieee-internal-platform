@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { LogOut, LayoutDashboard, ShieldCheck, FileText, ImageIcon, KeyRound } from 'lucide-react'
+import { LogOut, LayoutDashboard, ShieldCheck, FileText, ImageIcon, KeyRound, Receipt } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function Navbar() {
@@ -52,6 +52,16 @@ export function Navbar() {
               >
                 <ImageIcon size={15} />
                 MediaGen
+              </Link>
+            )}
+
+            {isAdmin && (
+              <Link
+                to="/reimbursement"
+                className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <Receipt size={15} />
+                Reimbursement
               </Link>
             )}
 

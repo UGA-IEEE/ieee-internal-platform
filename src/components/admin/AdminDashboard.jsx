@@ -262,11 +262,11 @@ export function AdminDashboard() {
         </div>
       </section>
 
-      {/* ── FYC Intern Tracker ─────────────────────────────────────── */}
+      {/* ── FYC Internship App Tracker ─────────────────────────────────────── */}
       <section className="mb-10">
         <div className="flex items-center gap-2 mb-4">
           <FileText size={18} className="text-ieee-blue" />
-          <h2 className="text-lg font-semibold text-gray-800">FYC Intern Tracker</h2>
+          <h2 className="text-lg font-semibold text-gray-800">FYC Internship App Tracker</h2>
           <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{fycMembers.length}</span>
         </div>
 

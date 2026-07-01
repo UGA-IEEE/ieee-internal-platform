@@ -9,6 +9,7 @@ import { AdminDashboard } from './components/admin/AdminDashboard'
 import { AdminMemberDetail } from './components/admin/AdminMemberDetail'
 import MediaGenApp from './components/mediagen/MediaGenApp'
 import { ChangePasswordPage } from './components/account/ChangePasswordPage'
+import ReimbursementApp from './reimbursement/ReimbursementApp'
 
 function AppRoutes() {
   const { user, profile, loading } = useAuth()
@@ -70,6 +71,16 @@ function AppRoutes() {
           <ProtectedRoute requireAdmin>
             <Navbar />
             <AdminMemberDetail />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/reimbursement"
+        element={
+          <ProtectedRoute requireAdmin>
+            <Navbar />
+            <ReimbursementApp />
           </ProtectedRoute>
         }
       />

@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
-import { FileText, ImageIcon } from 'lucide-react'
+import { FileText, ImageIcon, Receipt } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
 const TOOLS = [
   {
     id: 'fyc',
-    title: 'FYC Intern Tracker',
+    title: 'FYC Internship App Tracker',
     description: 'Track internship applications and monitor weekly progress toward your 35-app goal.',
     href: '/fyc',
     icon: <FileText size={28} />,
@@ -19,13 +19,21 @@ const TOOLS = [
     icon: <ImageIcon size={28} />,
     permission: 'can_access_mediagen',
   },
+  {
+    id: 'reimbursement',
+    title: 'Reimbursement Forms',
+    description: 'Fill out and generate UGA finance forms — CENGR, Dean of Students, travel, and more.',
+    href: '/reimbursement',
+    icon: <Receipt size={28} />,
+    adminOnly: true,
+  },
 ]
 
 export function PlatformDashboard() {
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
 
-  const available = TOOLS.filter(t => isAdmin || profile?.[t.permission])
+  const available = TOOLS.filter(t => t.adminOnly ? isAdmin : (isAdmin || profile?.[t.permission]))
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
