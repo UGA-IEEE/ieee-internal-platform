@@ -19,7 +19,7 @@ const C = {
 };
 
 export async function fillEntertainment(formData) {
-  const pdfBytes = await fetch('/forms/entertainment.pdf').then(r => r.arrayBuffer());
+  const pdfBytes = await fetch(`${import.meta.env.BASE_URL}forms/entertainment.pdf`).then(r => r.arrayBuffer());
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const page = pdfDoc.getPages()[0];
   const font = await getFont(pdfDoc);

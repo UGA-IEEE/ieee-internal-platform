@@ -1,0 +1,61 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_ORG_NAME: ${{ vars.VITE_ORG_NAME }}
+          VITE_IG_HANDLE: ${{ vars.VITE_IG_HANDLE }}
+          VITE_WEBSITE: ${{ vars.VITE_WEBSITE }}
+          VITE_SEMESTER: ${{ vars.VITE_SEMESTER }}
+          VITE_SPEEDTYPE_STUDENT_ACTIVITY: ${{ secrets.VITE_SPEEDTYPE_STUDENT_ACTIVITY }}
+          VITE_SPEEDTYPE_AGENCY: ${{ secrets.VITE_SPEEDTYPE_AGENCY }}
+          VITE_SPEEDTYPE_FOUNDATION: ${{ secrets.VITE_SPEEDTYPE_FOUNDATION }}
+          VITE_MEMBER_JUN_EMAIL: ${{ secrets.VITE_MEMBER_JUN_EMAIL }}
+          VITE_MEMBER_JUN_PHONE: ${{ secrets.VITE_MEMBER_JUN_PHONE }}
+          VITE_MEMBER_JUN_STREET: ${{ secrets.VITE_MEMBER_JUN_STREET }}
+          VITE_MEMBER_JUN_CITY: ${{ secrets.VITE_MEMBER_JUN_CITY }}
+          VITE_MEMBER_JUN_ZIP: ${{ secrets.VITE_MEMBER_JUN_ZIP }}
+          VITE_MEMBER_SID_EMAIL: ${{ secrets.VITE_MEMBER_SID_EMAIL }}
+          VITE_MEMBER_SID_PHONE: ${{ secrets.VITE_MEMBER_SID_PHONE }}
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

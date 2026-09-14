@@ -38,7 +38,7 @@ const C = {
 };
 
 export async function fillCENGR(formData) {
-  const pdfBytes = await fetch('/forms/cengr-reimbursement.pdf').then(r => r.arrayBuffer());
+  const pdfBytes = await fetch(`${import.meta.env.BASE_URL}forms/cengr-reimbursement.pdf`).then(r => r.arrayBuffer());
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const page = pdfDoc.getPages()[0];
   const font = await getFont(pdfDoc);

@@ -38,7 +38,7 @@ const C = {
 };
 
 export async function fillNonEmployee(formData) {
-  const pdfBytes = await fetch('/forms/non-employee-payment.pdf').then(r => r.arrayBuffer());
+  const pdfBytes = await fetch(`${import.meta.env.BASE_URL}forms/non-employee-payment.pdf`).then(r => r.arrayBuffer());
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const page = pdfDoc.getPages()[0];
   const font = await getFont(pdfDoc);
