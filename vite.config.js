@@ -4,5 +4,5 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: '/ieee-fycintern-tracker/',
+  base: '/ieee-internal-platform/',
 })
