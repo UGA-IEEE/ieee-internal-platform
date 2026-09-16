@@ -1,8 +1,15 @@
 import { WEEKLY_TARGET, getWeekStatus, getExpectedByNow, getCurrentWeekRange } from '../../utils/weekUtils'
 import { format } from 'date-fns'
-import { TrendingUp, TrendingDown, CheckCircle } from 'lucide-react'
+import { TrendingUp, TrendingDown, CheckCircle, Award } from 'lucide-react'
 
 const statusConfig = {
+  accepted: {
+    label: 'Accepted',
+    color: 'text-emerald-700',
+    bg: 'bg-emerald-50 border-emerald-200',
+    bar: 'bg-emerald-500',
+    Icon: Award,
+  },
   completed: {
     label: 'Goal Reached!',
     color: 'text-green-700',
@@ -26,8 +33,8 @@ const statusConfig = {
   },
 }
 
-export function WeeklyProgress({ weeklyCount }) {
-  const status = getWeekStatus(weeklyCount)
+export function WeeklyProgress({ weeklyCount, hasAcceptedOffer = false }) {
+  const status = getWeekStatus(weeklyCount, hasAcceptedOffer)
   const expectedByNow = getExpectedByNow()
   const { start, end } = getCurrentWeekRange()
   const pct = Math.min((weeklyCount / WEEKLY_TARGET) * 100, 100)
@@ -63,7 +70,9 @@ export function WeeklyProgress({ weeklyCount }) {
       </div>
 
       <p className="text-xs text-gray-500 mt-2">
-        Expected pace by today: <span className="font-semibold">{expectedByNow}</span>
+        {hasAcceptedOffer
+          ? "Weekly quotas no longer apply — congrats on the offer!"
+          : <>Expected pace by today: <span className="font-semibold">{expectedByNow}</span></>}
       </p>
     </div>
   )

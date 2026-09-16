@@ -3,10 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { isInCurrentWeek } from '../../utils/weekUtils'
-import { WeeklyProgress } from '../fyc/WeeklyProgress'
-import { ApplicationTable } from '../fyc/ApplicationTable'
+import { WeeklyProgress } from './WeeklyProgress'
+import { ApplicationTable } from './ApplicationTable'
 
-export function AdminMemberDetail() {
+export function PeerTrackerView() {
   const { userId } = useParams()
   const navigate = useNavigate()
   const [member, setMember] = useState(null)
@@ -16,7 +16,7 @@ export function AdminMemberDetail() {
   useEffect(() => {
     async function load() {
       const [{ data: profileData }, { data: appData }] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', userId).single(),
+        supabase.from('profiles').select('id, full_name, email').eq('id', userId).single(),
         supabase.from('applications').select('*').eq('user_id', userId)
           .order('date_applied', { ascending: false })
           .order('created_at', { ascending: false }),
@@ -39,7 +39,7 @@ export function AdminMemberDetail() {
   if (!member) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 text-center text-gray-400">
-        Member not found.
+        This tracker isn't shared with you, or the member wasn't found.
       </div>
     )
   }
@@ -50,11 +50,11 @@ export function AdminMemberDetail() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <button
-        onClick={() => navigate('/admin')}
+        onClick={() => navigate('/fyc')}
         className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-ieee-blue transition-colors mb-6"
       >
         <ArrowLeft size={16} />
-        Back to Dashboard
+        Back to My Tracker
       </button>
 
       <div className="flex items-start justify-between mb-6">

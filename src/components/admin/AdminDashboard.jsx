@@ -8,12 +8,14 @@ import { ResetPasswordModal } from './ResetPasswordModal'
 import { EditAccessModal } from './EditAccessModal'
 
 const STATUS_STYLES = {
+  accepted:   'bg-emerald-100 text-emerald-800',
   completed:  'bg-green-100 text-green-700',
   'on-track': 'bg-blue-100 text-ieee-blue',
   behind:     'bg-red-100 text-red-700',
 }
 
 const STATUS_LABELS = {
+  accepted:   'Accepted',
   completed:  'Completed',
   'on-track': 'On Track',
   behind:     'Behind',
@@ -104,7 +106,7 @@ export function AdminDashboard() {
     const [membersRes, adminsRes] = await Promise.all([
       supabase
         .from('profiles')
-        .select(`id, full_name, email, role, can_access_mediagen, can_access_fyc, applications (id, date_applied, status)`)
+        .select(`id, full_name, email, role, can_access_mediagen, can_access_fyc, hidden_from_peers, applications (id, date_applied, status)`)
         .eq('role', 'member')
         .order('full_name'),
       supabase
@@ -115,15 +117,20 @@ export function AdminDashboard() {
     ])
 
     if (!membersRes.error) {
-      setMembers(membersRes.data.map(m => ({
-        ...m,
-        weeklyCount: m.applications.filter(a => isInCurrentWeek(a.date_applied)).length,
-        totalCount: m.applications.length,
-        statusBreakdown: m.applications.reduce((acc, a) => {
+      setMembers(membersRes.data.map(m => {
+        const statusBreakdown = m.applications.reduce((acc, a) => {
           acc[a.status] = (acc[a.status] ?? 0) + 1
           return acc
-        }, {}),
-      })))
+        }, {})
+        return {
+          ...m,
+          weeklyCount: m.applications.filter(a => isInCurrentWeek(a.date_applied)).length,
+          totalCount: m.applications.length,
+          statusBreakdown,
+          offerCount: (statusBreakdown.offered ?? 0) + (statusBreakdown.accepted ?? 0),
+          hasAcceptedOffer: (statusBreakdown.accepted ?? 0) > 0,
+        }
+      }))
     }
     if (!adminsRes.error) setAdmins(adminsRes.data)
     setLoading(false)
@@ -176,7 +183,7 @@ export function AdminDashboard() {
   const unassignedMembers = members.filter(m => !m.can_access_fyc && !m.can_access_mediagen)
 
   const totalWeeklyApps = fycMembers.reduce((s, m) => s + m.weeklyCount, 0)
-  const behind = fycMembers.filter(m => getWeekStatus(m.weeklyCount) === 'behind')
+  const behind = fycMembers.filter(m => getWeekStatus(m.weeklyCount, m.hasAcceptedOffer) === 'behind')
   const completed = fycMembers.filter(m => m.weeklyCount >= WEEKLY_TARGET)
 
   if (loading) {
@@ -301,6 +308,7 @@ export function AdminDashboard() {
                   <th className="px-6 py-3 text-center font-medium">Total</th>
                   <th className="px-6 py-3 text-center font-medium">Interviews</th>
                   <th className="px-6 py-3 text-center font-medium">Offers</th>
+                  <th className="px-6 py-3 text-center font-medium">Accepted</th>
                   <th className="px-6 py-3 text-center font-medium">Status</th>
                   <th className="px-6 py-3 text-right font-medium">Actions</th>
                 </tr>
@@ -308,13 +316,13 @@ export function AdminDashboard() {
               <tbody className="divide-y divide-gray-100">
                 {fycMembers.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="text-center py-10 text-gray-400">
+                    <td colSpan={10} className="text-center py-10 text-gray-400">
                       No FYC members yet.
                     </td>
                   </tr>
                 ) : (
                   fycMembers.map(member => {
-                    const status = getWeekStatus(member.weeklyCount)
+                    const status = getWeekStatus(member.weeklyCount, member.hasAcceptedOffer)
                     return (
                       <tr key={member.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4 font-medium text-gray-800">{member.full_name}</td>
@@ -337,8 +345,13 @@ export function AdminDashboard() {
                           {member.statusBreakdown.interview ?? 0}
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className={member.statusBreakdown.offered > 0 ? 'text-green-600 font-semibold' : 'text-gray-400'}>
-                            {member.statusBreakdown.offered ?? 0}
+                          <span className={member.offerCount > 0 ? 'text-green-600 font-semibold' : 'text-gray-400'}>
+                            {member.offerCount}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={member.hasAcceptedOffer ? 'text-emerald-600 font-semibold' : 'text-gray-400'}>
+                            {member.statusBreakdown.accepted ?? 0}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-center">

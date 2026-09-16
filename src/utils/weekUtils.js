@@ -17,10 +17,12 @@ export function isInCurrentWeek(dateString) {
 }
 
 /**
- * Returns 'completed' | 'on-track' | 'behind'
- * Uses daily pace: expected = ceil(dayOfWeek / 7 * 35)
+ * Returns 'accepted' | 'completed' | 'on-track' | 'behind'
+ * A student who has accepted an offer is no longer held to the weekly
+ * quota. Otherwise uses daily pace: expected = ceil(dayOfWeek / 7 * 35)
  */
-export function getWeekStatus(weeklyCount) {
+export function getWeekStatus(weeklyCount, hasAcceptedOffer = false) {
+  if (hasAcceptedOffer) return 'accepted'
   if (weeklyCount >= WEEKLY_TARGET) return 'completed'
   const dayOfWeek = getISODay(new Date()) // 1=Mon … 7=Sun
   const expectedByNow = Math.ceil((dayOfWeek / 7) * WEEKLY_TARGET)

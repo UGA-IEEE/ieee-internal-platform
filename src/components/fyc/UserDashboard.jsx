@@ -6,6 +6,8 @@ import { isInCurrentWeek } from '../../utils/weekUtils'
 import { WeeklyProgress } from './WeeklyProgress'
 import { ApplicationTable } from './ApplicationTable'
 import { ApplicationForm } from './ApplicationForm'
+import { SharingToggle } from './SharingToggle'
+import { SharedTrackers } from './SharedTrackers'
 
 export function UserDashboard() {
   const { user } = useAuth()
@@ -50,6 +52,7 @@ export function UserDashboard() {
   }
 
   const weeklyCount = applications.filter(a => isInCurrentWeek(a.date_applied)).length
+  const hasAcceptedOffer = applications.some(a => a.status === 'accepted')
 
   if (loading) {
     return (
@@ -63,8 +66,16 @@ export function UserDashboard() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Weekly progress */}
       <div className="max-w-sm mb-8">
-        <WeeklyProgress weeklyCount={weeklyCount} />
+        <WeeklyProgress weeklyCount={weeklyCount} hasAcceptedOffer={hasAcceptedOffer} />
       </div>
+
+      {/* Sharing preference */}
+      <div className="mb-8">
+        <SharingToggle />
+      </div>
+
+      {/* Classmates who share their tracker */}
+      <SharedTrackers />
 
       {/* Applications section */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

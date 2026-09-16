@@ -5,6 +5,7 @@ import { Navbar } from './components/shared/Navbar'
 import { LoginPage } from './components/auth/LoginPage'
 import { PlatformDashboard } from './components/platform/PlatformDashboard'
 import { UserDashboard } from './components/fyc/UserDashboard'
+import { PeerTrackerView } from './components/fyc/PeerTrackerView'
 import { AdminDashboard } from './components/admin/AdminDashboard'
 import { AdminMemberDetail } from './components/admin/AdminMemberDetail'
 import MediaGenApp from './components/mediagen/MediaGenApp'
@@ -52,6 +53,16 @@ function AppRoutes() {
                 <Navbar />
                 <UserDashboard />
               </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/fyc/member/:userId"
+        element={
+          <ProtectedRoute requirePermission="can_access_fyc">
+            <Navbar />
+            <PeerTrackerView />
+          </ProtectedRoute>
         }
       />
 
