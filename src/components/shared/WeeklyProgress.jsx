@@ -33,11 +33,11 @@ const statusConfig = {
   },
 }
 
-export function WeeklyProgress({ weeklyCount, hasAcceptedOffer = false }) {
-  const status = getWeekStatus(weeklyCount, hasAcceptedOffer)
-  const expectedByNow = getExpectedByNow()
+export function WeeklyProgress({ weeklyCount, hasAcceptedOffer = false, weeklyTarget = WEEKLY_TARGET }) {
+  const status = getWeekStatus(weeklyCount, hasAcceptedOffer, weeklyTarget)
+  const expectedByNow = getExpectedByNow(weeklyTarget)
   const { start, end } = getCurrentWeekRange()
-  const pct = Math.min((weeklyCount / WEEKLY_TARGET) * 100, 100)
+  const pct = Math.min((weeklyCount / weeklyTarget) * 100, 100)
   const { label, color, bg, bar, Icon } = statusConfig[status]
 
   return (
@@ -58,7 +58,7 @@ export function WeeklyProgress({ weeklyCount, hasAcceptedOffer = false }) {
       {/* Count */}
       <div className="flex items-end gap-1 mb-3">
         <span className={`text-4xl font-bold ${color}`}>{weeklyCount}</span>
-        <span className="text-gray-400 text-lg mb-1">/ {WEEKLY_TARGET}</span>
+        <span className="text-gray-400 text-lg mb-1">/ {weeklyTarget}</span>
       </div>
 
       {/* Progress bar */}

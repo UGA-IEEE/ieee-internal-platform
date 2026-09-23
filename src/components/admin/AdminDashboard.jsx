@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { UserPlus, Users, TrendingDown, FileText, ChevronRight, KeyRound, Trash2, Check, Minus, ImageIcon, UserX, ShieldCheck } from 'lucide-react'
+import { UserPlus, Users, TrendingDown, FileText, ClipboardList, ChevronRight, KeyRound, Trash2, Check, Minus, ImageIcon, UserX, ShieldCheck } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
 import { isInCurrentWeek, getWeekStatus, WEEKLY_TARGET } from '../../utils/weekUtils'
 import { CreateMemberModal } from './CreateMemberModal'
 import { ResetPasswordModal } from './ResetPasswordModal'
@@ -91,6 +92,7 @@ function RowActions({ member, onReset, onDelete, onEditAccess, onView }) {
 
 export function AdminDashboard() {
   const navigate = useNavigate()
+  const { profile, refreshProfile } = useAuth()
   const [members, setMembers] = useState([])
   const [admins, setAdmins] = useState([])
   const [loading, setLoading] = useState(true)
@@ -106,12 +108,12 @@ export function AdminDashboard() {
     const [membersRes, adminsRes] = await Promise.all([
       supabase
         .from('profiles')
-        .select(`id, full_name, email, role, can_access_mediagen, can_access_fyc, hidden_from_peers, applications (id, date_applied, status)`)
+        .select(`id, full_name, email, role, can_access_mediagen, can_access_fyc, can_access_general_tracker, weekly_goal, hidden_from_peers, applications (id, date_applied, status), general_applications (id, date_applied, status)`)
         .eq('role', 'member')
         .order('full_name'),
       supabase
         .from('profiles')
-        .select(`id, full_name, email, role`)
+        .select(`id, full_name, email, role, can_access_general_tracker`)
         .eq('role', 'admin')
         .order('full_name'),
     ])
@@ -122,6 +124,10 @@ export function AdminDashboard() {
           acc[a.status] = (acc[a.status] ?? 0) + 1
           return acc
         }, {})
+        const generalStatusBreakdown = m.general_applications.reduce((acc, a) => {
+          acc[a.status] = (acc[a.status] ?? 0) + 1
+          return acc
+        }, {})
         return {
           ...m,
           weeklyCount: m.applications.filter(a => isInCurrentWeek(a.date_applied)).length,
@@ -129,6 +135,11 @@ export function AdminDashboard() {
           statusBreakdown,
           offerCount: (statusBreakdown.offered ?? 0) + (statusBreakdown.accepted ?? 0),
           hasAcceptedOffer: (statusBreakdown.accepted ?? 0) > 0,
+          generalWeeklyCount: m.general_applications.filter(a => isInCurrentWeek(a.date_applied)).length,
+          generalTotalCount: m.general_applications.length,
+          generalStatusBreakdown,
+          generalOfferCount: (generalStatusBreakdown.offered ?? 0) + (generalStatusBreakdown.accepted ?? 0),
+          generalHasAcceptedOffer: (generalStatusBreakdown.accepted ?? 0) > 0,
         }
       }))
     }
@@ -145,6 +156,10 @@ export function AdminDashboard() {
       setMembers(prev => prev.map(m =>
         m.id === memberId ? { ...m, [field]: !currentValue } : m
       ))
+      setAdmins(prev => prev.map(a =>
+        a.id === memberId ? { ...a, [field]: !currentValue } : a
+      ))
+      if (memberId === profile?.id) await refreshProfile()
     }
   }
 
@@ -179,12 +194,17 @@ export function AdminDashboard() {
   }
 
   const fycMembers = members.filter(m => m.can_access_fyc)
+  const generalTrackerMembers = members.filter(m => m.can_access_general_tracker)
   const mediagenMembers = members.filter(m => m.can_access_mediagen)
-  const unassignedMembers = members.filter(m => !m.can_access_fyc && !m.can_access_mediagen)
+  const unassignedMembers = members.filter(m => !m.can_access_fyc && !m.can_access_mediagen && !m.can_access_general_tracker)
 
   const totalWeeklyApps = fycMembers.reduce((s, m) => s + m.weeklyCount, 0)
   const behind = fycMembers.filter(m => getWeekStatus(m.weeklyCount, m.hasAcceptedOffer) === 'behind')
   const completed = fycMembers.filter(m => m.weeklyCount >= WEEKLY_TARGET)
+
+  const totalGeneralWeeklyApps = generalTrackerMembers.reduce((s, m) => s + m.generalWeeklyCount, 0)
+  const generalBehind = generalTrackerMembers.filter(m => getWeekStatus(m.generalWeeklyCount, m.generalHasAcceptedOffer, m.weekly_goal) === 'behind')
+  const generalCompleted = generalTrackerMembers.filter(m => m.generalWeeklyCount >= m.weekly_goal)
 
   if (loading) {
     return (
@@ -222,13 +242,14 @@ export function AdminDashboard() {
                 <tr>
                   <th className="px-6 py-3 text-left font-medium">Name</th>
                   <th className="px-6 py-3 text-left font-medium">Email</th>
+                  <th className="px-6 py-3 text-center font-medium">Non-FYC Tracker</th>
                   <th className="px-6 py-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {admins.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="text-center py-10 text-gray-400">
+                    <td colSpan={4} className="text-center py-10 text-gray-400">
                       No admins found.
                     </td>
                   </tr>
@@ -242,6 +263,15 @@ export function AdminDashboard() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-gray-500">{admin.email}</td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex justify-center">
+                          <PermissionToggle
+                            value={!!admin.can_access_general_tracker}
+                            onChange={() => handleTogglePermission(admin.id, 'can_access_general_tracker', !!admin.can_access_general_tracker)}
+                            title={admin.can_access_general_tracker ? 'Turn off non-FYC tracker' : 'Turn on non-FYC tracker'}
+                          />
+                        </div>
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
                           <button
@@ -378,6 +408,115 @@ export function AdminDashboard() {
         </div>
       </section>
 
+      {/* ── Internship Application Tracker (non-FYC) ─────────────────── */}
+      <section className="mb-10">
+        <div className="flex items-center gap-2 mb-4">
+          <ClipboardList size={18} className="text-ieee-blue" />
+          <h2 className="text-lg font-semibold text-gray-800">Internship App Tracker (Non-FYC)</h2>
+          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{generalTrackerMembers.length}</span>
+        </div>
+
+        {/* summary stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <StatCard icon={Users} label="Tracker Members" value={generalTrackerMembers.length} />
+          <StatCard icon={FileText} label="Apps This Week" value={totalGeneralWeeklyApps} sub="across all tracker members" />
+          <StatCard
+            icon={TrendingDown}
+            label="Behind This Week"
+            value={generalBehind.length}
+            color={generalBehind.length > 0 ? 'text-red-600' : 'text-gray-800'}
+          />
+          <StatCard
+            icon={FileText}
+            label="Hit Goal This Week"
+            value={generalCompleted.length}
+            sub={`of ${generalTrackerMembers.length} members`}
+            color={generalCompleted.length > 0 ? 'text-green-600' : 'text-gray-800'}
+          />
+        </div>
+
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-gray-600">
+                <tr>
+                  <th className="px-6 py-3 text-left font-medium">Name</th>
+                  <th className="px-6 py-3 text-left font-medium">Email</th>
+                  <th className="px-6 py-3 text-center font-medium">Access</th>
+                  <th className="px-6 py-3 text-center font-medium">This Week</th>
+                  <th className="px-6 py-3 text-center font-medium">Total</th>
+                  <th className="px-6 py-3 text-center font-medium">Interviews</th>
+                  <th className="px-6 py-3 text-center font-medium">Offers</th>
+                  <th className="px-6 py-3 text-center font-medium">Accepted</th>
+                  <th className="px-6 py-3 text-center font-medium">Status</th>
+                  <th className="px-6 py-3 text-right font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {generalTrackerMembers.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="text-center py-10 text-gray-400">
+                      No tracker members yet.
+                    </td>
+                  </tr>
+                ) : (
+                  generalTrackerMembers.map(member => {
+                    const status = getWeekStatus(member.generalWeeklyCount, member.generalHasAcceptedOffer, member.weekly_goal)
+                    return (
+                      <tr key={member.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 font-medium text-gray-800">{member.full_name}</td>
+                        <td className="px-6 py-4 text-gray-500">{member.email}</td>
+                        <td className="px-6 py-4 text-center">
+                          <div className="flex justify-center">
+                            <PermissionToggle
+                              value={member.can_access_general_tracker}
+                              onChange={() => handleTogglePermission(member.id, 'can_access_general_tracker', member.can_access_general_tracker)}
+                              title={member.can_access_general_tracker ? 'Revoke tracker access' : 'Grant tracker access'}
+                            />
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className="font-semibold">{member.generalWeeklyCount}</span>
+                          <span className="text-gray-400">/{member.weekly_goal}</span>
+                        </td>
+                        <td className="px-6 py-4 text-center font-semibold">{member.generalTotalCount}</td>
+                        <td className="px-6 py-4 text-center text-gray-600">
+                          {member.generalStatusBreakdown.interview ?? 0}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={member.generalOfferCount > 0 ? 'text-green-600 font-semibold' : 'text-gray-400'}>
+                            {member.generalOfferCount}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={member.generalHasAcceptedOffer ? 'text-emerald-600 font-semibold' : 'text-gray-400'}>
+                            {member.generalStatusBreakdown.accepted ?? 0}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[status]}`}>
+                            {STATUS_LABELS[status]}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <RowActions
+                            member={member}
+                            onReset={setResetTarget}
+                            onDelete={handleDelete}
+                            onEditAccess={setEditAccessTarget}
+                            onView={m => navigate(`/admin/general-member/${m.id}`)}
+                          />
+                        </td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       {/* ── MediaGen ───────────────────────────────────────────────── */}
       <section className="mb-10">
         <div className="flex items-center gap-2 mb-4">
@@ -453,6 +592,7 @@ export function AdminDashboard() {
                     <th className="px-6 py-3 text-left font-medium">Email</th>
                     <th className="px-6 py-3 text-center font-medium">MediaGen</th>
                     <th className="px-6 py-3 text-center font-medium">FYC Tracker</th>
+                    <th className="px-6 py-3 text-center font-medium">Non-FYC Tracker</th>
                     <th className="px-6 py-3 text-right font-medium">Actions</th>
                   </tr>
                 </thead>
@@ -479,6 +619,15 @@ export function AdminDashboard() {
                           />
                         </div>
                       </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex justify-center">
+                          <PermissionToggle
+                            value={false}
+                            onChange={() => handleTogglePermission(member.id, 'can_access_general_tracker', false)}
+                            title="Grant Non-FYC Tracker access"
+                          />
+                        </div>
+                      </td>
                       <td className="px-6 py-4">
                         <RowActions
                           member={member}
@@ -502,10 +651,20 @@ export function AdminDashboard() {
           onCreated={newUser => {
             setMembers(prev => [...prev, {
               ...newUser,
+              weekly_goal: newUser.weekly_goal ?? 10,
+              hidden_from_peers: false,
               applications: [],
               weeklyCount: 0,
               totalCount: 0,
               statusBreakdown: {},
+              offerCount: 0,
+              hasAcceptedOffer: false,
+              general_applications: [],
+              generalWeeklyCount: 0,
+              generalTotalCount: 0,
+              generalStatusBreakdown: {},
+              generalOfferCount: 0,
+              generalHasAcceptedOffer: false,
             }].sort((a, b) => a.full_name.localeCompare(b.full_name)))
             setShowCreate(false)
           }}

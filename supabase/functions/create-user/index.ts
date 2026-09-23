@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
       role = 'member',
       can_access_mediagen = false,
       can_access_fyc = false,
+      can_access_general_tracker = false,
     } = await req.json()
 
     if (!email || !password || !full_name) {
@@ -68,6 +69,7 @@ Deno.serve(async (req) => {
     // Admins always get access to all tools regardless of what was sent
     const resolvedMediagen = role === 'admin' ? true : can_access_mediagen
     const resolvedFyc = role === 'admin' ? true : can_access_fyc
+    const resolvedGeneralTracker = can_access_general_tracker
 
     // Insert profile row
     const { error: profileError } = await adminClient.from('profiles').insert({
@@ -77,6 +79,7 @@ Deno.serve(async (req) => {
       role,
       can_access_mediagen: resolvedMediagen,
       can_access_fyc: resolvedFyc,
+      can_access_general_tracker: resolvedGeneralTracker,
     })
 
     if (profileError) {
@@ -94,6 +97,7 @@ Deno.serve(async (req) => {
         role,
         can_access_mediagen: resolvedMediagen,
         can_access_fyc: resolvedFyc,
+        can_access_general_tracker: resolvedGeneralTracker,
       },
     }, 200)
   } catch (err) {

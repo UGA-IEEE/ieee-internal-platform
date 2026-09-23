@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { LogOut, LayoutDashboard, ShieldCheck, FileText, ImageIcon, KeyRound, Receipt } from 'lucide-react'
+import { LogOut, LayoutDashboard, ShieldCheck, FileText, ClipboardList, ImageIcon, KeyRound, Receipt } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function Navbar() {
@@ -8,6 +8,7 @@ export function Navbar() {
 
   const isAdmin = profile?.role === 'admin'
   const canFyc = !isAdmin && profile?.can_access_fyc
+  const canGeneralTracker = !!profile?.can_access_general_tracker
   const canMediagen = isAdmin || profile?.can_access_mediagen
 
   async function handleSignOut() {
@@ -42,6 +43,16 @@ export function Navbar() {
               >
                 <FileText size={15} />
                 FYC Tracker
+              </Link>
+            )}
+
+            {canGeneralTracker && (
+              <Link
+                to="/tracker"
+                className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <ClipboardList size={15} />
+                Application Tracker
               </Link>
             )}
 

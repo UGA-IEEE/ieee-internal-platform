@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { X, FileText, ImageIcon, EyeOff } from 'lucide-react'
+import { X, FileText, ClipboardList, ImageIcon, EyeOff } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 
 export function EditAccessModal({ member, onClose, onSaved }) {
   const [fyc, setFyc] = useState(member.can_access_fyc)
+  const [generalTracker, setGeneralTracker] = useState(member.can_access_general_tracker)
   const [mediagen, setMediagen] = useState(member.can_access_mediagen)
   const [hiddenFromPeers, setHiddenFromPeers] = useState(!!member.hidden_from_peers)
   const [saving, setSaving] = useState(false)
@@ -18,16 +19,22 @@ export function EditAccessModal({ member, onClose, onSaved }) {
   async function handleSave() {
     setSaving(true)
     setError('')
+    const updates = {
+      can_access_fyc: fyc,
+      can_access_general_tracker: generalTracker,
+      can_access_mediagen: mediagen,
+      hidden_from_peers: hiddenFromPeers,
+    }
     const { error } = await supabase
       .from('profiles')
-      .update({ can_access_fyc: fyc, can_access_mediagen: mediagen, hidden_from_peers: hiddenFromPeers })
+      .update(updates)
       .eq('id', member.id)
 
     if (error) {
       setError(error.message)
       setSaving(false)
     } else {
-      onSaved(member.id, { can_access_fyc: fyc, can_access_mediagen: mediagen, hidden_from_peers: hiddenFromPeers })
+      onSaved(member.id, updates)
       onClose()
     }
   }
@@ -61,6 +68,19 @@ export function EditAccessModal({ member, onClose, onSaved }) {
 
           <label className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors">
             <div className="flex items-center gap-3">
+              <ClipboardList size={16} className="text-ieee-blue" />
+              <span className="text-sm font-medium text-gray-700">Internship App Tracker (non-FYC)</span>
+            </div>
+            <input
+              type="checkbox"
+              checked={generalTracker}
+              onChange={e => setGeneralTracker(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-ieee-blue focus:ring-ieee-blue"
+            />
+          </label>
+
+          <label className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors">
+            <div className="flex items-center gap-3">
               <ImageIcon size={16} className="text-uga-red" />
               <span className="text-sm font-medium text-gray-700">MediaGen</span>
             </div>
@@ -72,13 +92,13 @@ export function EditAccessModal({ member, onClose, onSaved }) {
             />
           </label>
 
-          {fyc && (
+          {(fyc || generalTracker) && (
             <label className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors">
               <div className="flex items-center gap-3">
                 <EyeOff size={16} className="text-gray-500" />
                 <div>
-                  <span className="text-sm font-medium text-gray-700 block">Hide from FYC peers</span>
-                  <span className="text-xs text-gray-400">Won't appear in classmates' shared-tracker list, even if sharing is on</span>
+                  <span className="text-sm font-medium text-gray-700 block">Hide from tracker peers</span>
+                  <span className="text-xs text-gray-400">Won't appear in other members' shared-tracker list, even if sharing is on</span>
                 </div>
               </div>
               <input

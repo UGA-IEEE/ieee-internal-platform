@@ -19,7 +19,7 @@ function SortIcon({ column, sortBy, sortDir }) {
     : <ChevronDown size={14} className="text-ieee-blue" />
 }
 
-export function ApplicationTable({ applications, onEdit, onDeleted, readOnly = false }) {
+export function ApplicationTable({ applications, onEdit, onDeleted, readOnly = false, table = 'applications' }) {
   const { profile } = useAuth()
   const [sortBy, setSortBy] = useState('date_applied')
   const [sortDir, setSortDir] = useState('desc')
@@ -42,7 +42,7 @@ export function ApplicationTable({ applications, onEdit, onDeleted, readOnly = f
 
   async function handleDelete(id) {
     if (!window.confirm('Delete this application? This cannot be undone.')) return
-    const { error } = await supabase.from('applications').delete().eq('id', id)
+    const { error } = await supabase.from(table).delete().eq('id', id)
     if (!error) onDeleted(id)
   }
 

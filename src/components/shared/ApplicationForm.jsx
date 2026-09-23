@@ -16,7 +16,7 @@ const EMPTY_FORM = {
   status: 'applied',
 }
 
-export function ApplicationForm({ onClose, onSaved, existing = null }) {
+export function ApplicationForm({ onClose, onSaved, existing = null, table = 'applications' }) {
   const { user } = useAuth()
   const [form, setForm] = useState(existing ? {
     date_applied: existing.date_applied,
@@ -49,14 +49,14 @@ export function ApplicationForm({ onClose, onSaved, existing = null }) {
       let result
       if (existing) {
         result = await supabase
-          .from('applications')
+          .from(table)
           .update(payload)
           .eq('id', existing.id)
           .select()
           .single()
       } else {
         result = await supabase
-          .from('applications')
+          .from(table)
           .insert({ ...payload, user_id: user.id })
           .select()
           .single()

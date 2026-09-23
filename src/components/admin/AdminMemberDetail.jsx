@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import { isInCurrentWeek } from '../../utils/weekUtils'
-import { WeeklyProgress } from '../fyc/WeeklyProgress'
-import { ApplicationTable } from '../fyc/ApplicationTable'
+import { WEEKLY_TARGET, isInCurrentWeek } from '../../utils/weekUtils'
+import { WeeklyProgress } from '../shared/WeeklyProgress'
+import { ApplicationTable } from '../shared/ApplicationTable'
 
-export function AdminMemberDetail() {
+export function AdminMemberDetail({ table = 'applications' }) {
   const { userId } = useParams()
   const navigate = useNavigate()
   const [member, setMember] = useState(null)
@@ -17,7 +17,7 @@ export function AdminMemberDetail() {
     async function load() {
       const [{ data: profileData }, { data: appData }] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', userId).single(),
-        supabase.from('applications').select('*').eq('user_id', userId)
+        supabase.from(table).select('*').eq('user_id', userId)
           .order('date_applied', { ascending: false })
           .order('created_at', { ascending: false }),
       ])
@@ -26,7 +26,7 @@ export function AdminMemberDetail() {
       setLoading(false)
     }
     load()
-  }, [userId])
+  }, [userId, table])
 
   if (loading) {
     return (
@@ -44,6 +44,7 @@ export function AdminMemberDetail() {
     )
   }
 
+  const weeklyTarget = table === 'applications' ? WEEKLY_TARGET : (member.weekly_goal ?? WEEKLY_TARGET)
   const weeklyCount = applications.filter(a => isInCurrentWeek(a.date_applied)).length
   const hasAcceptedOffer = applications.some(a => a.status === 'accepted')
 
@@ -69,7 +70,7 @@ export function AdminMemberDetail() {
       </div>
 
       <div className="max-w-sm mb-8">
-        <WeeklyProgress weeklyCount={weeklyCount} hasAcceptedOffer={hasAcceptedOffer} />
+        <WeeklyProgress weeklyCount={weeklyCount} hasAcceptedOffer={hasAcceptedOffer} weeklyTarget={weeklyTarget} />
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -79,6 +80,7 @@ export function AdminMemberDetail() {
           onEdit={() => {}}
           onDeleted={() => {}}
           readOnly
+          table={table}
         />
       </div>
     </div>

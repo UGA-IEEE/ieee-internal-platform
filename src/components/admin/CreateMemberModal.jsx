@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 
-const EMPTY = { full_name: '', email: '', password: '', role: 'member', can_access_mediagen: false, can_access_fyc: false }
+const EMPTY = { full_name: '', email: '', password: '', role: 'member', can_access_mediagen: false, can_access_fyc: false, can_access_general_tracker: false }
 
 export function CreateMemberModal({ onClose, onCreated }) {
   const [form, setForm] = useState(EMPTY)
@@ -136,9 +136,18 @@ export function CreateMemberModal({ onClose, onCreated }) {
                 />
                 <span className="text-sm text-gray-700">FYC Internship App Tracker</span>
               </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.can_access_general_tracker}
+                  onChange={e => set('can_access_general_tracker', e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-ieee-blue focus:ring-ieee-blue"
+                />
+                <span className="text-sm text-gray-700">Internship App Tracker (non-FYC)</span>
+              </label>
             </div>
             {form.role === 'admin' && (
-              <p className="text-xs text-gray-400 mt-1.5">Admins have access to all tools.</p>
+              <p className="text-xs text-gray-400 mt-1.5">Admins have access to all tools except the non-FYC tracker, which is opt-in.</p>
             )}
           </div>
 

@@ -6,11 +6,14 @@ import { isInCurrentWeek } from '../../utils/weekUtils'
 import { WeeklyProgress } from '../shared/WeeklyProgress'
 import { ApplicationTable } from '../shared/ApplicationTable'
 import { ApplicationForm } from '../shared/ApplicationForm'
+import { GoalSettings } from './GoalSettings'
 import { SharingToggle } from './SharingToggle'
 import { SharedTrackers } from './SharedTrackers'
 
+const TABLE = 'general_applications'
+
 export function UserDashboard() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -22,7 +25,7 @@ export function UserDashboard() {
 
   async function fetchApplications() {
     const { data, error } = await supabase
-      .from('applications')
+      .from(TABLE)
       .select('*')
       .eq('user_id', user.id)
       .order('date_applied', { ascending: false })
@@ -51,6 +54,7 @@ export function UserDashboard() {
     setApplications(prev => prev.filter(a => a.id !== id))
   }
 
+  const weeklyTarget = profile?.weekly_goal ?? 10
   const weeklyCount = applications.filter(a => isInCurrentWeek(a.date_applied)).length
   const hasAcceptedOffer = applications.some(a => a.status === 'accepted')
 
@@ -65,8 +69,13 @@ export function UserDashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Weekly progress */}
-      <div className="max-w-sm mb-8">
-        <WeeklyProgress weeklyCount={weeklyCount} hasAcceptedOffer={hasAcceptedOffer} />
+      <div className="max-w-sm mb-4">
+        <WeeklyProgress weeklyCount={weeklyCount} hasAcceptedOffer={hasAcceptedOffer} weeklyTarget={weeklyTarget} />
+      </div>
+
+      {/* Adjustable weekly goal */}
+      <div className="mb-8">
+        <GoalSettings />
       </div>
 
       {/* Sharing preference */}
@@ -74,7 +83,7 @@ export function UserDashboard() {
         <SharingToggle />
       </div>
 
-      {/* Classmates who share their tracker */}
+      {/* Members who share their tracker */}
       <SharedTrackers />
 
       {/* Applications section */}
@@ -94,6 +103,7 @@ export function UserDashboard() {
           applications={applications}
           onEdit={handleEdit}
           onDeleted={handleDeleted}
+          table={TABLE}
         />
       </div>
 
@@ -102,6 +112,7 @@ export function UserDashboard() {
           existing={editTarget}
           onClose={() => { setShowForm(false); setEditTarget(null) }}
           onSaved={handleSaved}
+          table={TABLE}
         />
       )}
     </div>

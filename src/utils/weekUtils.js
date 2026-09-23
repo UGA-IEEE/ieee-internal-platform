@@ -19,17 +19,19 @@ export function isInCurrentWeek(dateString) {
 /**
  * Returns 'accepted' | 'completed' | 'on-track' | 'behind'
  * A student who has accepted an offer is no longer held to the weekly
- * quota. Otherwise uses daily pace: expected = ceil(dayOfWeek / 7 * 35)
+ * quota. Otherwise uses daily pace: expected = ceil(dayOfWeek / 7 * target)
+ * `target` defaults to the fixed FYC WEEKLY_TARGET but callers with a
+ * per-member adjustable goal (e.g. the general tracker) can pass their own.
  */
-export function getWeekStatus(weeklyCount, hasAcceptedOffer = false) {
+export function getWeekStatus(weeklyCount, hasAcceptedOffer = false, target = WEEKLY_TARGET) {
   if (hasAcceptedOffer) return 'accepted'
-  if (weeklyCount >= WEEKLY_TARGET) return 'completed'
+  if (weeklyCount >= target) return 'completed'
   const dayOfWeek = getISODay(new Date()) // 1=Mon … 7=Sun
-  const expectedByNow = Math.ceil((dayOfWeek / 7) * WEEKLY_TARGET)
+  const expectedByNow = Math.ceil((dayOfWeek / 7) * target)
   return weeklyCount >= expectedByNow ? 'on-track' : 'behind'
 }
 
-export function getExpectedByNow() {
+export function getExpectedByNow(target = WEEKLY_TARGET) {
   const dayOfWeek = getISODay(new Date())
-  return Math.ceil((dayOfWeek / 7) * WEEKLY_TARGET)
+  return Math.ceil((dayOfWeek / 7) * target)
 }

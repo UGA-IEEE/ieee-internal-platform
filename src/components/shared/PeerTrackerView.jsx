@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import { isInCurrentWeek } from '../../utils/weekUtils'
+import { WEEKLY_TARGET, isInCurrentWeek } from '../../utils/weekUtils'
 import { WeeklyProgress } from './WeeklyProgress'
 import { ApplicationTable } from './ApplicationTable'
 
-export function PeerTrackerView() {
+export function PeerTrackerView({ table = 'applications', backHref = '/fyc' }) {
   const { userId } = useParams()
   const navigate = useNavigate()
   const [member, setMember] = useState(null)
@@ -16,8 +16,8 @@ export function PeerTrackerView() {
   useEffect(() => {
     async function load() {
       const [{ data: profileData }, { data: appData }] = await Promise.all([
-        supabase.from('profiles').select('id, full_name, email').eq('id', userId).single(),
-        supabase.from('applications').select('*').eq('user_id', userId)
+        supabase.from('profiles').select('id, full_name, email, weekly_goal').eq('id', userId).single(),
+        supabase.from(table).select('*').eq('user_id', userId)
           .order('date_applied', { ascending: false })
           .order('created_at', { ascending: false }),
       ])
@@ -26,7 +26,7 @@ export function PeerTrackerView() {
       setLoading(false)
     }
     load()
-  }, [userId])
+  }, [userId, table])
 
   if (loading) {
     return (
@@ -44,13 +44,14 @@ export function PeerTrackerView() {
     )
   }
 
+  const weeklyTarget = table === 'applications' ? WEEKLY_TARGET : (member.weekly_goal ?? WEEKLY_TARGET)
   const weeklyCount = applications.filter(a => isInCurrentWeek(a.date_applied)).length
   const hasAcceptedOffer = applications.some(a => a.status === 'accepted')
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <button
-        onClick={() => navigate('/fyc')}
+        onClick={() => navigate(backHref)}
         className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-ieee-blue transition-colors mb-6"
       >
         <ArrowLeft size={16} />
@@ -69,7 +70,7 @@ export function PeerTrackerView() {
       </div>
 
       <div className="max-w-sm mb-8">
-        <WeeklyProgress weeklyCount={weeklyCount} hasAcceptedOffer={hasAcceptedOffer} />
+        <WeeklyProgress weeklyCount={weeklyCount} hasAcceptedOffer={hasAcceptedOffer} weeklyTarget={weeklyTarget} />
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -79,6 +80,7 @@ export function PeerTrackerView() {
           onEdit={() => {}}
           onDeleted={() => {}}
           readOnly
+          table={table}
         />
       </div>
     </div>

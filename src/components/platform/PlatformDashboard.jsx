@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { FileText, ImageIcon, Receipt } from 'lucide-react'
+import { FileText, ClipboardList, ImageIcon, Receipt } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
 const TOOLS = [
@@ -10,6 +10,15 @@ const TOOLS = [
     href: '/fyc',
     icon: <FileText size={28} />,
     permission: 'can_access_fyc',
+  },
+  {
+    id: 'tracker',
+    title: 'Internship Application Tracker',
+    description: 'Track internship applications and monitor weekly progress toward a goal you set yourself.',
+    href: '/tracker',
+    icon: <ClipboardList size={28} />,
+    permission: 'can_access_general_tracker',
+    adminNeedsFlag: true,
   },
   {
     id: 'mediagen',
@@ -33,7 +42,11 @@ export function PlatformDashboard() {
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
 
-  const available = TOOLS.filter(t => t.adminOnly ? isAdmin : (isAdmin || profile?.[t.permission]))
+  const available = TOOLS.filter(t => {
+    if (t.adminOnly) return isAdmin
+    if (isAdmin && !t.adminNeedsFlag) return true
+    return !!profile?.[t.permission]
+  })
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

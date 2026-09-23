@@ -5,7 +5,8 @@ import { Navbar } from './components/shared/Navbar'
 import { LoginPage } from './components/auth/LoginPage'
 import { PlatformDashboard } from './components/platform/PlatformDashboard'
 import { UserDashboard } from './components/fyc/UserDashboard'
-import { PeerTrackerView } from './components/fyc/PeerTrackerView'
+import { UserDashboard as GeneralUserDashboard } from './components/general/UserDashboard'
+import { PeerTrackerView } from './components/shared/PeerTrackerView'
 import { AdminDashboard } from './components/admin/AdminDashboard'
 import { AdminMemberDetail } from './components/admin/AdminMemberDetail'
 import MediaGenApp from './components/mediagen/MediaGenApp'
@@ -61,7 +62,29 @@ function AppRoutes() {
         element={
           <ProtectedRoute requirePermission="can_access_fyc">
             <Navbar />
-            <PeerTrackerView />
+            <PeerTrackerView table="applications" backHref="/fyc" />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/tracker"
+        element={
+          profile?.role === 'admin' && !profile?.can_access_general_tracker
+            ? <Navigate to="/admin" replace />
+            : <ProtectedRoute requirePermission="can_access_general_tracker">
+                <Navbar />
+                <GeneralUserDashboard />
+              </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/tracker/member/:userId"
+        element={
+          <ProtectedRoute requirePermission="can_access_general_tracker">
+            <Navbar />
+            <PeerTrackerView table="general_applications" backHref="/tracker" />
           </ProtectedRoute>
         }
       />
@@ -81,7 +104,17 @@ function AppRoutes() {
         element={
           <ProtectedRoute requireAdmin>
             <Navbar />
-            <AdminMemberDetail />
+            <AdminMemberDetail table="applications" />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/general-member/:userId"
+        element={
+          <ProtectedRoute requireAdmin>
+            <Navbar />
+            <AdminMemberDetail table="general_applications" />
           </ProtectedRoute>
         }
       />
