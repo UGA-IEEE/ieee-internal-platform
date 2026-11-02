@@ -50,6 +50,10 @@ export function UserDashboard() {
     setShowForm(true)
   }
 
+  function handleImported(rows) {
+    setApplications(prev => [...rows, ...prev])
+  }
+
   function handleDeleted(id) {
     setApplications(prev => prev.filter(a => a.id !== id))
   }
@@ -104,6 +108,7 @@ export function UserDashboard() {
           onEdit={handleEdit}
           onDeleted={handleDeleted}
           table={TABLE}
+          onImported={handleImported}
         />
       </div>
 

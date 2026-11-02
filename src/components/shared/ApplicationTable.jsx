@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Pencil, Trash2, ExternalLink, Download, ChevronUp, ChevronDown } from 'lucide-react'
+import { Pencil, Trash2, ExternalLink, Download, Upload, ChevronUp, ChevronDown } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { exportApplicationsToExcel } from '../../utils/exportUtils'
 import { useAuth } from '../../contexts/AuthContext'
+import { ImportApplicationsModal } from './ImportApplicationsModal'
 
 const STATUS_STYLES = {
   applied:   'bg-blue-100 text-blue-800',
@@ -19,8 +20,9 @@ function SortIcon({ column, sortBy, sortDir }) {
     : <ChevronDown size={14} className="text-ieee-blue" />
 }
 
-export function ApplicationTable({ applications, onEdit, onDeleted, readOnly = false, table = 'applications' }) {
+export function ApplicationTable({ applications, onEdit, onDeleted, onImported, readOnly = false, table = 'applications' }) {
   const { profile } = useAuth()
+  const [showImport, setShowImport] = useState(false)
   const [sortBy, setSortBy] = useState('date_applied')
   const [sortDir, setSortDir] = useState('desc')
 
@@ -66,14 +68,25 @@ export function ApplicationTable({ applications, onEdit, onDeleted, readOnly = f
         <p className="text-sm text-gray-500">
           {applications.length} application{applications.length !== 1 ? 's' : ''}
         </p>
-        <button
-          onClick={() => exportApplicationsToExcel(applications, profile?.full_name)}
-          className="flex items-center gap-1.5 text-sm text-ieee-blue hover:text-ieee-blue-dark font-medium transition-colors"
-          // exportApplicationsToExcel is async; browser download is triggered inside
-        >
-          <Download size={15} />
-          Export to Excel
-        </button>
+        <div className="flex items-center gap-4">
+          {!readOnly && onImported && (
+            <button
+              onClick={() => setShowImport(true)}
+              className="flex items-center gap-1.5 text-sm text-ieee-blue hover:text-ieee-blue-dark font-medium transition-colors"
+            >
+              <Upload size={15} />
+              Import from Excel
+            </button>
+          )}
+          <button
+            onClick={() => exportApplicationsToExcel(applications, profile?.full_name)}
+            className="flex items-center gap-1.5 text-sm text-ieee-blue hover:text-ieee-blue-dark font-medium transition-colors"
+            // exportApplicationsToExcel is async; browser download is triggered inside
+          >
+            <Download size={15} />
+            Export to Excel
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -157,6 +170,15 @@ export function ApplicationTable({ applications, onEdit, onDeleted, readOnly = f
           </tbody>
         </table>
       </div>
+
+      {showImport && (
+        <ImportApplicationsModal
+          existing={applications}
+          table={table}
+          onClose={() => setShowImport(false)}
+          onImported={rows => { setShowImport(false); onImported(rows) }}
+        />
+      )}
     </div>
   )
 }

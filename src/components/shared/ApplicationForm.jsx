@@ -3,8 +3,7 @@ import { X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { format } from 'date-fns'
-
-const STATUS_OPTIONS = ['applied', 'interview', 'offered', 'rejected', 'accepted']
+import { STATUS_OPTIONS } from '../../utils/exportUtils'
 
 const EMPTY_FORM = {
   date_applied: format(new Date(), 'yyyy-MM-dd'),
